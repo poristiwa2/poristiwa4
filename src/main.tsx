@@ -3,15 +3,38 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
 
-const root = document.getElementById("root");
-if (root) {
+const rootEl = document.getElementById("root");
+const fallbackEl = document.getElementById("root-fallback");
+
+function showError(msg: string) {
+  if (rootEl) {
+    rootEl.innerHTML =
+      '<div style="padding:40px;text-align:center;font-family:sans-serif;max-width:600px;margin:0 auto">' +
+      '<h1 style="color:#dc2626;font-size:24px">Poristiwa</h1>' +
+      '<p style="color:#666;margin-top:16px">' + msg + '</p>' +
+      '</div>';
+  }
+  if (fallbackEl) fallbackEl.style.display = "none";
+}
+
+window.onerror = function (msg) {
+  showError("Error: " + String(msg));
+};
+
+window.addEventListener("unhandledrejection", function (e) {
+  showError("Promise error: " + String(e.reason));
+});
+
+if (rootEl) {
   try {
-    createRoot(root).render(
+    const root = createRoot(rootEl);
+    root.render(
       <React.StrictMode>
         <App />
       </React.StrictMode>
     );
+    if (fallbackEl) fallbackEl.style.display = "none";
   } catch (e) {
-    root.innerHTML = '<div style="padding:40px;text-align:center;font-family:sans-serif"><h1>Terjadi Kesalahan</h1><p>' + String(e) + '</p></div>';
+    showError("Init error: " + String(e));
   }
 }
